@@ -468,26 +468,25 @@
         let timerInterval = null;
 
         // --- KONFIGURASI GOOGLE SHEETS ---
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzBIxfDP18Mx62uTyLM2VhTt97BCLKBE9-xuDgcHBIK5HgDLwWMg5R0sqZaRn0hytZJlw/exec"; 
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwYBKT9Bjzhz-roEIIoa1sSgB0utq6ToAkoU1VAgSUrrGUQbdLk4KJqMEc3wsqUKkSnkw/exec"; 
 
         function sendDataToSheets(statusGame) {
-            if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === "https://script.google.com/macros/s/AKfycbzBIxfDP18Mx62uTyLM2VhTt97BCLKBE9-xuDgcHBIK5HgDLwWMg5R0sqZaRn0hytZJlw/exec") {
+            if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === "") {
                 console.log("URL Google Sheets belum diisi. Data tidak dikirim.");
                 return Promise.resolve(); // Return promise agar bisa ditunggu (await)
             }
 
-            const payload = {
-                nama: state.playerName,
-                jawabanBenar: state.correctAnswersLog.length,
-                status: statusGame
-            };
+            // MENGGUNAKAN FORM DATA (URLSearchParams) agar mudah dibaca Google tanpa terblokir
+            const formData = new URLSearchParams();
+            formData.append("nama", state.playerName);
+            formData.append("jawabanBenar", state.correctAnswersLog.length);
+            formData.append("status", statusGame);
 
             // Tambahkan 'return' pada fetch agar prosesnya bisa ditunggu sebelum reload
             return fetch(GOOGLE_SHEETS_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
+                body: formData
             })
             .then(response => console.log("Data berhasil dikirim ke Google Sheets!"))
             .catch(error => console.error("Error saat mengirim data: ", error));
