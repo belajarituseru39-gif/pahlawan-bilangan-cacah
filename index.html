@@ -130,7 +130,7 @@
         #shop-container { display: flex; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 10px 5px; overflow-x: auto; width: 100%; min-height: 250px; align-items: center; -webkit-overflow-scrolling: touch; }
         .shop-item-wrapper { flex: 0 0 auto; cursor: pointer; margin-bottom: 10px; }
 
-        /* --- MODAL ANBK STYLE (QUESTION) --- */
+        /* --- MODAL (QUESTION) --- */
         .modal-content-anbk { background: #fff; border-radius: 12px; width: 98%; max-width: 1200px; max-height: 95vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); animation: popIn 0.3s ease-out; }
         .modal-header-anbk { background: #2c3e50; color: white; padding: 15px 20px; font-size: 1.1rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #3498db; }
         .modal-body-anbk { display: flex; flex-direction: row; height: 100%; overflow: hidden; background: #eaedf2; }
@@ -431,37 +431,10 @@
         };
 
         function generateCompleteQuestionBank(jenjang) {
-            const baseSoal = DB_BASE_SOAL[jenjang];
-            const result = [];
-            
-            const reqEasy = 20; 
-            const reqMed = 30;  
-            const reqHard = 10; 
-            
-            function fillDifficulty(targetDiff, reqCount) {
-                let diffBase = baseSoal.filter(q => q.difficulty === targetDiff);
-                if (diffBase.length === 0) diffBase = baseSoal; // Keamanan fallback
-                
-                let counter = 0;
-                while (counter < reqCount) {
-                    const template = diffBase[counter % diffBase.length];
-                    const clonedQ = JSON.parse(JSON.stringify(template));
-                    clonedQ.id = `${jenjang.toLowerCase()}_${targetDiff}_${counter}`; 
-                    
-                    if (counter >= diffBase.length) {
-                         clonedQ.text = clonedQ.text + " \u200B"; // Modifikasi ringan
-                    }
-                    
-                    result.push(clonedQ);
-                    counter++;
-                }
-            }
-
-            fillDifficulty('easy', reqEasy);
-            fillDifficulty('medium', reqMed);
-            fillDifficulty('hard', reqHard);
-            
-            return result;
+            // Kita langsung memetakan semua soal dari DB yang tersedia
+            // tanpa ada duplikasi palsu.
+            const baseSoal = DB_BASE_SOAL[jenjang] || [];
+            return baseSoal.map(q => JSON.parse(JSON.stringify(q)));
         }
 
         // --- TIMER LOGIC ---
@@ -482,7 +455,6 @@
             formData.append("jawabanBenar", state.correctAnswersLog.length);
             formData.append("status", statusGame);
 
-            // Tambahkan 'return' pada fetch agar prosesnya bisa ditunggu sebelum reload
             return fetch(GOOGLE_SHEETS_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -498,13 +470,12 @@
             btn.style.opacity = "0.7";
             btn.style.pointerEvents = "none";
 
-            // Mengirim data dengan status bahwa pemain keluar sebelum tamat
             sendDataToSheets("Berhenti di Tengah Permainan")
             .then(() => {
-                setTimeout(() => location.reload(), 500); // Beri jeda sebentar agar pengiriman selesai, lalu reload
+                setTimeout(() => location.reload(), 500);
             })
             .catch(() => {
-                setTimeout(() => location.reload(), 500); // Tetap reload meski terjadi error jaringan
+                setTimeout(() => location.reload(), 500);
             });
         }
 
@@ -753,7 +724,7 @@
         function showFinalVictory() {
             if(timerInterval) clearInterval(timerInterval);
             
-            sendDataToSheets("Menang (Boss Kalahkan)"); // Kirim data saat pemain tamat
+            sendDataToSheets("Menang (Boss Kalahkan)"); 
 
             const modal = document.getElementById('result-modal');
             document.getElementById('result-title').innerText = "MISI SUKSES! BUMI AMAN!";
@@ -794,10 +765,14 @@
             let eligible = QUESTION_DB.filter(q => q.difficulty === difficulty && !state.askedQuestions.includes(q.id));
             
             if (eligible.length === 0) {
+                // Semua soal untuk tingkat ini sudah habis, kita hapus log soal khusus difficulty ini
                 const diffQuestionIds = QUESTION_DB.filter(q => q.difficulty === difficulty).map(q => q.id);
                 state.askedQuestions = state.askedQuestions.filter(id => !diffQuestionIds.includes(id));
                 eligible = QUESTION_DB.filter(q => q.difficulty === difficulty);
             }
+            
+            // Failsafe jika DB kosong (misal salah inisialisasi)
+            if(eligible.length === 0) return null;
             
             const randomIndex = Math.floor(Math.random() * eligible.length);
             const q = eligible[randomIndex];
@@ -807,10 +782,18 @@
         }
 
         function openQuestion() {
-            const modal = document.getElementById('question-modal');
             currentQuestion = getQuestionByDifficulty();
             
+            // Keamanan tambahan jika soal gagal ter-load
+            if (!currentQuestion) {
+                showNotification("Gagal memuat soal, mohon coba lagi!");
+                return;
+            }
+
+            const modal = document.getElementById('question-modal');
             const subTitle = currentQuestion.type === 'multiple' ? ' (Pilih >1 Jawaban)' : '';
+            
+            // Update teks untuk soal cacah
             document.getElementById('q-category').innerText = `SOAL BILANGAN CACAH: ${currentQuestion.category}${subTitle}`;
             document.getElementById('q-difficulty').innerText = `Level: ${currentQuestion.difficulty.toUpperCase()}`;
             
@@ -824,7 +807,7 @@
             submitBtn.style.display = 'inline-block';
             submitBtn.onclick = () => validateAnbkAnswer();
 
-            if (!currentQuestion.options) return; // Failsafe
+            if (!currentQuestion.options) return;
             [...currentQuestion.options].sort(() => Math.random() - 0.5).forEach((opt) => {
                 const label = document.createElement('label');
                 label.className = 'answer-label-anbk';
