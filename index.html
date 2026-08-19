@@ -221,7 +221,7 @@
                 </select>
             </div>
             <ul class="tutorial-list" style="font-size: 0.95rem;">
-                <li>📝 <strong>Cari Dana:</strong> Jawab soal literasi & numerasi ANBK untuk mendapatkan uang.</li>
+                <li>📝 <strong>Cari Dana:</strong> Jawab soal bilangan cacah untuk mendapatkan uang.</li>
                 <li>☑️ Terdapat <strong>Pilihan Ganda</strong> dan <strong>Pilihan Ganda Kompleks</strong> (jawaban > 1).</li>
                 <li>🛒 <strong>Toko Hero:</strong> Gunakan uang untuk merekrut Pahlawan (Maks 5).</li>
                 <li>👹 <strong>Serang Monster:</strong> Kalahkan bos jika total kekuatan tim melebihi kekuatan musuh!</li>
@@ -244,7 +244,7 @@
             <div class="stat-box"><span>🛡️ Lvl:</span><span id="level-display" style="color: #f1c40f;">1</span></div>
             <div class="stat-box"><span>💰 Dana:</span><span id="money-display" style="color: #2ecc71;">0</span></div>
             <div class="stat-box"><span>⚔️ Hero:</span><span id="player-power-display" style="color: #e94560;">0</span></div>
-            <div class="stat-box"><span>👹 Musuh:</span><span id="monster-power-display" style="color: #e74c3c;">690</span></div>
+            <div class="stat-box"><span>👹 Musuh:</span><span id="monster-power-display" style="color: #e74c3c;">250</span></div>
             <div class="stat-box" id="timer-box" style="display:none;"><span>⏱️ Sisa:</span><span id="time-display" style="color: #fff;">--:--</span></div>
         </div>
         <div class="hud-right"></div>
@@ -275,7 +275,7 @@
     <div class="modal-overlay" id="question-modal" style="background: rgba(0,0,0,0.9);">
         <div class="modal-content-anbk">
             <div class="modal-header-anbk">
-                <div id="q-category">SIMULASI ANBK LITERASI & NUMERASI</div>
+                <div id="q-category">SOAL BILANGAN CACAH</div>
                 <div id="q-difficulty" style="background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 15px; font-size: 0.85rem;">Level</div>
             </div>
             <div class="modal-body-anbk">
@@ -369,11 +369,11 @@
         ];
 
         const MONSTER_LEVELS = [
-            { level: 1, power: 690, name: "Iblis Karang", imgUrl: "https://i.imgur.com/x530qSv.png" },
-            { level: 2, power: 900, name: "Lidah Api Gurun", imgUrl: "https://i.imgur.com/mZBUen4.png" },
-            { level: 3, power: 1200, name: "Beruang Batu", imgUrl: "https://i.imgur.com/d9M4IUs.png" },
-            { level: 4, power: 1600, name: "Golem Robo", imgUrl: "https://i.imgur.com/pAJHg59.png" },
-            { level: 5, power: 2200, name: "Jenderal Naga Hitam", imgUrl: "https://i.imgur.com/bEtpTiF.png" }
+            { level: 1, power: 250, name: "Iblis Karang", imgUrl: "https://i.imgur.com/x530qSv.png" },
+            { level: 2, power: 450, name: "Lidah Api Gurun", imgUrl: "https://i.imgur.com/mZBUen4.png" },
+            { level: 3, power: 700, name: "Beruang Batu", imgUrl: "https://i.imgur.com/d9M4IUs.png" },
+            { level: 4, power: 1000, name: "Golem Robo", imgUrl: "https://i.imgur.com/pAJHg59.png" },
+            { level: 5, power: 1200, name: "Jenderal Naga Hitam", imgUrl: "https://i.imgur.com/bEtpTiF.png" }
         ];
 
         const DB_BASE_SOAL = {
@@ -423,7 +423,7 @@
             money: 0,
             level: 1,
             myHeroes: [],
-            baseMonsterPower: 690,
+            baseMonsterPower: 250,
             correctAnswersLog: [],
             askedQuestions: [], // Menyimpan ID soal yang sudah keluar agar tidak berulang
             timeLimit: 0,
@@ -811,7 +811,7 @@
             currentQuestion = getQuestionByDifficulty();
             
             const subTitle = currentQuestion.type === 'multiple' ? ' (Pilih >1 Jawaban)' : '';
-            document.getElementById('q-category').innerText = `SIMULASI ANBK: ${currentQuestion.category}${subTitle}`;
+            document.getElementById('q-category').innerText = `SOAL BILANGAN CACAH: ${currentQuestion.category}${subTitle}`;
             document.getElementById('q-difficulty').innerText = `Level: ${currentQuestion.difficulty.toUpperCase()}`;
             
             document.getElementById('q-stimulus').innerText = currentQuestion.stimulus;
